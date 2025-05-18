@@ -1,6 +1,6 @@
+*.xml
+*.iml
 .env
 .idea/
-*.iml
 __pycache__/
 *.pyc
-*.xml
