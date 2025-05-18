@@ -120,6 +120,7 @@ async def handle_username_choice(callback: CallbackQuery, state: FSMContext):
         return await finalize_form(callback.message, state)
     else:
         await callback.message.answer("Введите инфорга (через @):")
+        return None
 
 
 @dp.message(Form.informer)
