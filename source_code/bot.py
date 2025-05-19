@@ -10,7 +10,9 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardB
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from config import BOT_TOKEN, GKP_CHAT_ID
+from source_code.config import INFORG_CHAT_ID
 from source_code.form import Form
+from source_code.middleware import GroupMembershipMiddleware
 
 bot = Bot(
     token=BOT_TOKEN,
@@ -25,6 +27,8 @@ cancel_kb = ReplyKeyboardMarkup(
     one_time_keyboard=False
 )
 
+dp.message.middleware(GroupMembershipMiddleware(INFORG_CHAT_ID))
+dp.callback_query.middleware(GroupMembershipMiddleware(INFORG_CHAT_ID))
 
 @dp.message(lambda message: message.text and message.text.lower() in {"❌ отменить", "/cancel"})
 async def cancel_handler(message: Message, state: FSMContext):
@@ -39,7 +43,6 @@ async def cmd_start(message: Message):
     builder = InlineKeyboardBuilder()
     builder.button(text="📝 Составить заявку", callback_data="create_request")
     await message.answer("Привет! Выберите действие:", reply_markup=builder.as_markup())
-
 
 @dp.callback_query(lambda c: c.data == "create_request")
 async def process_create_request(callback: CallbackQuery, state: FSMContext):
@@ -74,7 +77,6 @@ async def step_missing_place(message: Message, state: FSMContext):
     await state.update_data(missing_place=message.text)
     await message.answer("Морг (обязательно указать, звоним или нет):", reply_markup=cancel_kb)
     await state.set_state(Form.morgue)
-
 
 @dp.message(Form.morgue)
 async def step_morgue(message: Message, state: FSMContext):
