@@ -39,7 +39,7 @@ async def step_morgue(message: Message, state: FSMContext):
 
 async def step_additional(message: Message, state: FSMContext):
     await state.update_data(additional=message.text)
-    await message.answer("Примечание (важные детали для ГКП):", reply_markup=cancel_kb)
+    await message.answer("Примечания (важные детали для ГКП):", reply_markup=cancel_kb)
     await state.set_state(Form.notes)
 
 async def step_notes(message: Message, state: FSMContext):

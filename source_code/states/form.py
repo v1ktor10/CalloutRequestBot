@@ -10,3 +10,4 @@ class Form(StatesGroup):
     additional = State()
     notes = State()
     informer = State()
+    edit_field = State()

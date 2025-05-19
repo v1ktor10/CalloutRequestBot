@@ -16,7 +16,7 @@ async def handle_username_choice(callback: CallbackQuery, state: FSMContext):
     else:
         await callback.message.answer("Введите инфорга (через @):")
 
-async def process_confirmation(callback: CallbackQuery, state: FSMContext):
+async def request_confirmation(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_reply_markup()
     if callback.data == "confirm_yes":
         data = await state.get_data()
@@ -28,7 +28,7 @@ async def process_confirmation(callback: CallbackQuery, state: FSMContext):
             f"<b>Место пропажи:</b> {data['missing_place']}\n"
             f"<b>Морг:</b> {data['morgue']}\n"
             f"<b>Дополнительно:</b> {data['additional']}\n"
-            f"<b>Примечание:</b> {data['notes']}\n"
+            f"<b>Примечания:</b> {data['notes']}\n"
             f"<b>Инфорг:</b> {data['informer']}"
         )
         await callback.bot.send_message(GKP_CHAT_ID, message_text)
@@ -40,4 +40,4 @@ async def process_confirmation(callback: CallbackQuery, state: FSMContext):
 
 def register(dp: Dispatcher):
     dp.callback_query.register(handle_username_choice, Form.informer, lambda c: c.data in {"use_username", "edit_username"})
-    dp.callback_query.register(process_confirmation, Form.confirm, lambda c: c.data in {"confirm_yes", "confirm_no"})
+    dp.callback_query.register(request_confirmation, Form.confirm, lambda c: c.data in {"confirm_yes", "confirm_no"})
