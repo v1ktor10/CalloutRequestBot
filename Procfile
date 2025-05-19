@@ -1,1 +1,1 @@
-worker: PYTHONPATH=. python source_code/bot.py
+worker: PYTHONPATH=. python source_code/main.py

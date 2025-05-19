@@ -26,12 +26,12 @@ class GroupMembershipMiddleware(BaseMiddleware):
             member = await bot.get_chat_member(chat_id=self.group_chat_id, user_id=user.id)
             if member.status not in {"member", "creator", "administrator"}:
                 await event.answer("🚫 Вы должны быть участником группы инфоргов.")
-                return
+                return None
         except TelegramForbiddenError:
             await event.answer("🚫 Бот не имеет прав на проверку группы.")
-            return
+            return None
         except Exception as e:
             await event.answer(f"⚠️ Ошибка при проверке группы: {e}")
-            return
+            return None
 
         return await handler(event, data)
