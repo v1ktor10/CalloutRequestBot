@@ -21,3 +21,8 @@ def new_request_keyboard():
     kb = InlineKeyboardBuilder()
     kb.button(text="📝 Новая заявка", callback_data="create_request")
     return kb.as_markup()
+
+def request_message_keyboard():
+    kb = InlineKeyboardBuilder()
+    kb.button(text="📞 Прозвон начал", callback_data="start_call")
+    return kb.as_markup()
