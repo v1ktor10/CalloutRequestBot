@@ -3,7 +3,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage
-from config import BOT_TOKEN, INFORG_CHAT_ID
+from config import BOT_TOKEN, GKP_CHAT_ID, INFORG_CHAT_ID
 from middleware.group_membership import GroupMembershipMiddleware
 from handlers import start, step, confirmation
 from source_code.handlers import edit
@@ -14,8 +14,8 @@ bot = Bot(
 )
 dp = Dispatcher(storage=MemoryStorage())
 
-dp.message.middleware(GroupMembershipMiddleware(INFORG_CHAT_ID))
-dp.callback_query.middleware(GroupMembershipMiddleware(INFORG_CHAT_ID))
+dp.message.middleware(GroupMembershipMiddleware([INFORG_CHAT_ID, GKP_CHAT_ID]))
+dp.callback_query.middleware(GroupMembershipMiddleware([INFORG_CHAT_ID, GKP_CHAT_ID]))
 
 start.register(dp)
 step.register(dp)
