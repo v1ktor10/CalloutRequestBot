@@ -1,0 +1,82 @@
+name: Deploy Bot to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        run: |
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+          set -e
+
+          sudo apt update
+          sudo apt install -y python3.11 python3.11-venv git
+
+          # Папка проекта
+          PROJECT_DIR=/home/${USER}/CalloutRequestBot
+
+          if [ ! -d "$PROJECT_DIR" ]; then
+            git clone https://github.com/v1ktor10/CalloutRequestBot.git $PROJECT_DIR
+            cd $PROJECT_DIR
+            python3.11 -m venv venv
+          else
+            cd $PROJECT_DIR
+            git pull
+          fi
+
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+          # Создаём config.py из секретов
+          cat > config.py <<CONFIG
+          BOT_TOKEN = "${BOT_TOKEN}"
+          GKP_CHAT_ID = ${GKP_CHAT_ID}
+          INFORG_CHAT_ID = ${INFORG_CHAT_ID}
+          CONFIG
+
+          # Создаём systemd unit, если его ещё нет
+          SERVICE_FILE=/etc/systemd/system/calloutbot.service
+          if [ ! -f "$SERVICE_FILE" ]; then
+            sudo tee $SERVICE_FILE > /dev/null <<SERVICE
+          [Unit]
+          Description=Telegram Callout Request Bot
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=${USER}
+          WorkingDirectory=$PROJECT_DIR
+          Environment="PYTHONPATH=."
+          ExecStart=$PROJECT_DIR/venv/bin/python source_code/main.py
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+          SERVICE
+            sudo systemctl daemon-reload
+            sudo systemctl enable calloutbot
+          fi
+
+          sudo systemctl restart calloutbot
+          EOF
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GKP_CHAT_ID: ${{ secrets.GKP_CHAT_ID }}
+          INFORG_CHAT_ID: ${{ secrets.INFORG_CHAT_ID }}
